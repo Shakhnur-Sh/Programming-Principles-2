@@ -75,7 +75,7 @@ def parse_receipt(file_path):
     for it in items:
         total_calculated += it["total_price"]
 
-    # 6) Extract all prices (optional, just to show you did it)
+    # 6) Extract all prices 
     all_prices = re.findall(r"[\d\s]+,\d{2}", data)
 
     # 7) JSON result
