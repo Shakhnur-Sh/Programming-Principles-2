@@ -1,53 +1,19 @@
 import os
 import shutil
-from pathlib import Path
 
-source_dir = Path("source_files")
-target_dir = Path("target_files")
+# Create source and target directories
+source_dir = "source_files"
+target_dir = "target_files"
 
-if os.path.exists("source_files") == False:
-    os.mkdir("source_files")
+if os.path.exists(source_dir) == False:
+    os.mkdir(source_dir)
 
-if os.path.exists("target_files") == False:
-    os.mkdir("target_files")
+if os.path.exists(target_dir) == False:
+    os.mkdir(target_dir)
 
-# Create sample files
-file1 = source_dir / "notes.txt"
-file2 = source_dir / "data.csv"
-
-with open(file1, "w", encoding="utf-8") as f:
-    f.write("This is a text file.\n")
-
-with open(file2, "w", encoding="utf-8") as f:
-    f.write("id,name\n1,Ali\n2,Aruzhan\n")
-
-# Find files by extension
-print("TXT files:")
-for file in source_dir.iterdir():
-    if file.suffix == ".txt":
-        print(file.name)
-
-# Copy txt file
-shutil.copy(file1, target_dir / file1.name)
-print(f"{file1.name} copied to {target_dir}")
-
-# Move csv file
-shutil.move(str(file2), str(target_dir / file2.name))
-print(f"{file2.name} moved to {target_dir}")# directory_management/move_files.py
-
-import os
-import shutil
-from pathlib import Path
-
-source_dir = Path("source_files")
-target_dir = Path("target_files")
-
-source_dir.mkdir(exist_ok=True)
-target_dir.mkdir(exist_ok=True)
-
-# Create sample files
-file1 = source_dir / "notes.txt"
-file2 = source_dir / "data.csv"
+# Create sample files in source_files
+file1 = os.path.join(source_dir, "notes.txt")
+file2 = os.path.join(source_dir, "data.csv")
 
 with open(file1, "w", encoding="utf-8") as f:
     f.write("This is a text file.\n")
@@ -57,14 +23,16 @@ with open(file2, "w", encoding="utf-8") as f:
 
 # Find files by extension
 print("TXT files:")
-for file in source_dir.iterdir():
-    if file.suffix == ".txt":
-        print(file.name)
+for file in os.listdir(source_dir):
+    if file.endswith(".txt"):
+        print(file)
 
 # Copy txt file
-shutil.copy(file1, target_dir / file1.name)
-print(f"{file1.name} copied to {target_dir}")
+copy_path = os.path.join(target_dir, "notes.txt")
+shutil.copy(file1, copy_path)
+print("notes.txt copied to target_files")
 
 # Move csv file
-shutil.move(str(file2), str(target_dir / file2.name))
-print(f"{file2.name} moved to {target_dir}")
+move_path = os.path.join(target_dir, "data.csv")
+shutil.move(file2, move_path)
+print("data.csv moved to target_files")
