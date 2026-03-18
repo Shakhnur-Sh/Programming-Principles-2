@@ -15,3 +15,6 @@ print("Sum:", sum(scores))
 print("Minimum:", min(scores))
 print("Maximum:", max(scores))
 print("Sorted scores:", sorted(scores))
+
+#enumerate() is used to get both index and value while iterating over a list, starting from 1 in this case.
+#zip() is used to combine two lists (names and scores) into pairs for iteration.
