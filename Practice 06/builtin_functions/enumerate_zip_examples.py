@@ -3,11 +3,11 @@ scores = [85, 92, 78]
 
 # enumerate()
 for index, name in enumerate(names, start=1):
-    print(f"Using enumerate(): {index}, {name}")
+    print(index, name)
 
 # zip()
 for name, score in zip(names, scores):
-    print(f"Using zip(): {name}, {score}")
+    print(name, score)
 
 # Built-in functions
 print("Length:", len(scores))
