@@ -35,8 +35,8 @@ class MickeyClock:
         distance = 58
         angle_rad = math.radians(angle_deg)
 
-        x = self.clock_center[0] + math.sin(angle_rad) * distance
-        y = self.clock_center[1] - math.cos(angle_rad) * distance
+        x = self.clock_center[0] + math.sin(angle_rad) * distance # Shifting by x
+        y = self.clock_center[1] - math.cos(angle_rad) * distance # Shifting by y
 
         rect = rotated_image.get_rect(center=(x, y))
         self.screen.blit(rotated_image, rect)
@@ -44,7 +44,7 @@ class MickeyClock:
     def draw(self):
         self.screen.fill(self.bg_color)
 
-        now = datetime.now()
+        now = datetime.now() # Get current time
         minutes = now.minute
         seconds = now.second
 
