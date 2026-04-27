@@ -4,132 +4,135 @@ import sys
 
 pygame.init()
 
-# SETTINGS
+# Размер окна
 WIDTH = 400
 HEIGHT = 600
-FPS = 60
 
+# Цвета
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-GRAY = (120, 120, 120)
-GREEN = (0, 200, 0)
+BLUE = (0, 100, 255)
 RED = (220, 0, 0)
 YELLOW = (255, 215, 0)
-BLUE = (0, 100, 255)
 
+# Окно игры
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Racer")
+pygame.display.set_caption("Simple Racer")
+
+# Часы для скорости игры
 clock = pygame.time.Clock()
 
-font_small = pygame.font.SysFont("Verdana", 20)
-font_big = pygame.font.SysFont("Verdana", 40)
+# Шрифт для текста
+font = pygame.font.SysFont("Verdana", 20)
 
-enemy_speed = 6
-road_line_y = 0
-coins_collected = 0
+# Счёт
 score = 0
+coins_collected = 0
 
-# PLAYER CLASS
+
+# ---------------- PLAYER ----------------
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        # create a simple car shape using rectangles
+
+        # Простая синяя машинка
         self.image = pygame.Surface((50, 90))
         self.image.fill(BLUE)
-        pygame.draw.rect(self.image, BLACK, (5, 10, 40, 70), 3)
 
+        # Прямоугольник машинки
         self.rect = self.image.get_rect()
-        self.rect.center = (WIDTH // 2, HEIGHT - 100)
+        self.rect.center = (200, 500)
 
     def move(self):
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_LEFT] and self.rect.left > 60:
-            self.rect.move_ip(-6, 0)
-        if keys[pygame.K_RIGHT] and self.rect.right < WIDTH - 60:
-            self.rect.move_ip(6, 0)
+        # Движение влево
+        if keys[pygame.K_LEFT]:
+            self.rect.x -= 5
 
-# ENEMY CLASS
+        # Движение вправо
+        if keys[pygame.K_RIGHT]:
+            self.rect.x += 5
+
+        # Ограничения по границам дороги
+        if self.rect.left < 50:
+            self.rect.left = 50
+
+        if self.rect.right > 350:
+            self.rect.right = 350
+
+
+# ---------------- ENEMY ----------------
 class Enemy(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
+
+        # Красная машинка
         self.image = pygame.Surface((50, 90))
         self.image.fill(RED)
-        pygame.draw.rect(self.image, BLACK, (5, 10, 40, 70), 3)
 
         self.rect = self.image.get_rect()
-        self.reset_position()
+        self.reset()
 
-    def reset_position(self):
-        # Враг появляется в одной из дорожных полос
-        lane_x = random.choice([100, 200, 300])
-        self.rect.center = (lane_x, -100)
+    def reset(self):
+        # Случайная позиция по X внутри дороги
+        self.rect.x = random.randint(50, 300)
+        self.rect.y = -100
 
     def move(self):
         global score
-        self.rect.move_ip(0, enemy_speed)
 
+        self.rect.y += 5
+
+        # Если враг ушёл вниз, вернуть наверх
         if self.rect.top > HEIGHT:
-            self.reset_position()
+            self.reset()
             score += 1
 
-# COIN CLASS
+
+# ---------------- COIN ----------------
 class Coin(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((24, 24), pygame.SRCALPHA)
-        pygame.draw.circle(self.image, YELLOW, (12, 12), 12)
-        pygame.draw.circle(self.image, BLACK, (12, 12), 12, 2)
+
+        # Монета как круг
+        self.image = pygame.Surface((20, 20), pygame.SRCALPHA)
+        pygame.draw.circle(self.image, YELLOW, (10, 10), 10)
 
         self.rect = self.image.get_rect()
         self.active = False
-        self.spawn_delay = random.randint(60, 180)  # задержка перед появлением
         self.timer = 0
+        self.delay = random.randint(60, 150)
 
     def update(self):
+        # Если монета пока не активна, ждём
         if not self.active:
             self.timer += 1
-            if self.timer >= self.spawn_delay:
-                lane_x = random.choice([100, 200, 300])
-                self.rect.center = (lane_x, -20)
+            if self.timer >= self.delay:
+                self.rect.x = random.randint(60, 320)
+                self.rect.y = -20
                 self.active = True
                 self.timer = 0
-                self.spawn_delay = random.randint(60, 180)
+                self.delay = random.randint(60, 150)
         else:
-            self.rect.move_ip(0, enemy_speed)
+            # Если активна, двигается вниз
+            self.rect.y += 5
+
+            # Если ушла за экран, исчезает
             if self.rect.top > HEIGHT:
                 self.active = False
 
-    def draw(self, surface):
+    def draw(self):
         if self.active:
-            surface.blit(self.image, self.rect)
+            screen.blit(self.image, self.rect)
 
-# DRAW ROAD
-def draw_road():
-    global road_line_y
 
-    screen.fill((30, 30, 30))
-
-    # Дорога
-    pygame.draw.rect(screen, GRAY, (50, 0, 300, HEIGHT))
-
-    # Левая и правая граница дороги
-    pygame.draw.line(screen, WHITE, (50, 0), (50, HEIGHT), 5)
-    pygame.draw.line(screen, WHITE, (350, 0), (350, HEIGHT), 5)
-
-    # Разделительные линии
-    for y in range(-40, HEIGHT, 80):
-        pygame.draw.rect(screen, WHITE, (195, y + road_line_y, 10, 40))
-
-    road_line_y += enemy_speed
-    if road_line_y >= 80:
-        road_line_y = 0
-
-# GAME OBJECTS
+# Создаём объекты
 player = Player()
 enemy = Enemy()
 coin = Coin()
 
+# Группы спрайтов
 all_sprites = pygame.sprite.Group()
 enemies = pygame.sprite.Group()
 
@@ -137,58 +140,65 @@ all_sprites.add(player)
 all_sprites.add(enemy)
 enemies.add(enemy)
 
-# GAME OVER SCREEN
+
+# ---------------- GAME OVER ----------------
 def game_over():
-    text = font_big.render("Game Over", True, WHITE)
-    screen.fill(BLACK)
-    screen.blit(text, (100, 250))
+    screen.fill(WHITE)
+
+    text = font.render("Game Over", True, BLACK)
+    screen.blit(text, (150, 280))
+
     pygame.display.update()
     pygame.time.delay(2000)
+
     pygame.quit()
     sys.exit()
 
-# MAIN LOOP
+
+# ---------------- MAIN LOOP ----------------
 while True:
+    # События
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
 
-    # Движение игрока
+    # Движение объектов
     player.move()
-
-    # Движение врага
     enemy.move()
-
-    # Обновление монеты
     coin.update()
 
-    # Проверка столкновения с врагом
+    # Столкновение с врагом
     if pygame.sprite.spritecollideany(player, enemies):
         game_over()
 
-    # Проверка сбора монеты
+    # Сбор монеты
     if coin.active and player.rect.colliderect(coin.rect):
         coins_collected += 1
         coin.active = False
 
-    # Рисуем фон дороги
-    draw_road()
+    # Фон
+    screen.fill(WHITE)
 
-    # Рисуем спрайты
+    # Границы дороги
+    pygame.draw.line(screen, BLACK, (50, 0), (50, HEIGHT), 3)
+    pygame.draw.line(screen, BLACK, (350, 0), (350, HEIGHT), 3)
+
+    # Рисуем машинки
     for sprite in all_sprites:
         screen.blit(sprite.image, sprite.rect)
 
-    # Рисуем монету, если она активна
-    coin.draw(screen)
+    # Рисуем монету
+    coin.draw()
 
-    # Текст: score слева сверху
-    score_text = font_small.render(f"Score: {score}", True, BLACK)
+    # Текст score
+    score_text = font.render("Score: " + str(score), True, BLACK)
     screen.blit(score_text, (10, 10))
 
-    # Текст: coins справа сверху
-    coin_text = font_small.render(f"Coins: {coins_collected}", True, BLACK)
-    screen.blit(coin_text, (WIDTH - 120, 10))
+    # Текст coins справа сверху
+    coin_text = font.render("Coins: " + str(coins_collected), True, BLACK)
+    screen.blit(coin_text, (280, 10))
 
+    # Обновляем экран
     pygame.display.update()
-    clock.tick(FPS)
+    clock.tick(60)
